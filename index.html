@@ -14,9 +14,20 @@
 </head>
 
 <body>
+    <div id="root">
+        <div id="radviz-container"></div>
+        <div id="pie-container"></div>
+        <div id="parallel-container"></div>
+    </div>
     <script>
         d3.csv('iris.csv').then(data => {
+            // Ensure columns are set explicitly
+            data.columns = Object.keys(data[0]);
+
+            // Pass the processed data to the Control class
             new Control(data);
+        }).catch(error => {
+            console.error("Error loading CSV file:", error);
         });
     </script>
 </body>
