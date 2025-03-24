@@ -126,7 +126,7 @@ class RadViz {
                     .attr("text-anchor", "middle")
                     .attr("font-size", "10px")
                     .attr("fill", "black")
-                    .text((p, i) => `${this.arrDimension[i]}: ${d[this.arrDimension[i]]}`);
+                    .text((p, i) => `${d[this.arrDimension[i]]}`);
                 // Highlight only the corresponding parallel coordinate line
                 this.control.parallel.highlightSingle(d);
                 // Add values to the tooltip
@@ -198,8 +198,11 @@ class RadViz {
 
     // New helper method to reset highlighting.
     unhighlight() {
+        // Reset data point opacity and remove polygon highlights and labels
         this.svg.selectAll(".data-point")
             .attr("fill-opacity", 0.5);
+        this.svg.selectAll(".highlight-polygon").remove();
+        this.svg.selectAll(".polygon-label").remove();
     }
 
     removeHighlightLine() {
@@ -227,7 +230,7 @@ class RadViz {
             .attr("stroke-width", 2)
             .attr("fill", this.color(d.variety))
             .attr("fill-opacity", 0.2);
-        // Add text labels at the corners of the polygon (value only)
+        // Add text labels at the corners of the polygon (displaying only the numeric value)
         this.svg.selectAll(".polygon-label")
             .data(points)
             .enter()
