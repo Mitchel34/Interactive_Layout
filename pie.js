@@ -1,14 +1,15 @@
 class Pie {
     constructor(data, w, h, con) {
         this.con = con;
+        this.currentClicked = null; // Track the currently clicked section
 
         // Use the existing container
         const svg = d3.select("#pie-container")
             .append("svg")
             .attr("width", "100%")
-            .attr("height", "100%")
+            .attr("height", "150%")  // Increased height for a taller piechart svg
             .append("g")
-            .attr("transform", `translate(${w/4}, ${h/4})`); // Adjust translation to center in the container
+            .attr("transform", `translate(${w/4}, ${h/4})`);
 
         this.svg = svg;
 
@@ -18,23 +19,34 @@ class Pie {
 
         const arc = d3.arc()
             .innerRadius(0)
-            .outerRadius(Math.min(w, h) / 2 - 20);
+            .outerRadius(Math.min(w, h) / 4 - 20);
 
-        // Draw pie slices
+        // Draw pie slices with toggling click.
         this.pie = svg.selectAll(".slice")
             .data(arrPie)
             .enter()
             .append("g")
             .attr("class", "slice")
             .on("click", (e, d) => {
-                con.Select(d.data);
+                if (this.currentClicked === d.data) {
+                    // Reset all sections to full opacity
+                    this.pie.selectAll("path").attr("fill-opacity", 0.5);
+                    this.currentClicked = null;
+                    con.resetViews();
+                } else {
+                    // Highlight the clicked section and dim others
+                    this.pie.selectAll("path")
+                        .attr("fill-opacity", slice => (slice.data === d.data ? 1 : 0.2));
+                    this.currentClicked = d.data;
+                    con.updateViews(x => x.variety === d.data);
+                }
             });
 
         this.pie.append("path")
             .attr("d", arc)
             .attr("fill", d => con.color(d.data))
             .attr("stroke", "black")
-            .attr("fill-opacity", 0.8); // Set opacity to 0.8
+            .attr("fill-opacity", 0.5);
 
         this.pie.append("text")
             .attr("transform", d => `translate(${arc.centroid(d)})`)
@@ -42,57 +54,14 @@ class Pie {
             .text(d => `${d.data}: ${d.value}`);
     }
 
-    // Highlight the slice for the specified variety.
-    Highlight(variety) {
-        this.pie.selectAll('path')
-            .attr('fill-opacity', d => d.data === variety ? 1 : 0.2); // Highlight selected slice
+    highlightBySpecies(species) {
+        this.pie.selectAll("path")
+            .attr("fill-opacity", d => d.data === species ? 1 : 0.2);
     }
 
-    // Reset the highlighting.
     Unhighlight() {
         this.pie.selectAll('path')
-            .attr('fill-opacity', 0.8); // Reset to default opacity
+            .attr('fill-opacity', 0.5);
     }
 
-    // Update the pie chart when data changes or filtering is applied.
-    update(filteredData, activeFilter) {
-        const margin = this.con.margin;
-        const w = +this.con.root.style("width").replace("px", "");
-        const h = +this.con.root.style("height").replace("px", "");
-        const size = {
-            width: w,
-            height: h,
-            margin: margin
-        };
-
-        // Updating pie layout with filtered data.
-        const arrVariety = Array.from(new Set(filteredData.map(x => x.variety)));
-        const arrPie = d3.pie().value(d => filteredData.filter(x => x.variety === d).length)(arrVariety);
-        const arc = d3.arc()
-            .innerRadius(0)
-            .outerRadius(size.width / 2 - margin.left);
-
-        // Bind the new data.
-        this.pie = this.svg.selectAll('g.slice')
-            .data(arrPie);
-
-        // Update existing slices.
-        this.pie.select('path')
-            .transition().duration(500)
-            .attr('d', arc)
-            .attr('fill', d => this.con.color(d.data))
-            .attr('stroke', 'black');
-
-        this.pie.select('text')
-            .transition().duration(500)
-            .attr('transform', d => `translate(${arc.centroid(d)})`)
-            .text(d => `${d.data}: ${d.value}`);
-
-        // If a filter is active, highlight that slice.
-        if (activeFilter) {
-            this.Highlight(activeFilter);
-        } else {
-            this.Unhighlight();
-        }
-    }
 }

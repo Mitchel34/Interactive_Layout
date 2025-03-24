@@ -15,9 +15,9 @@
 
 <body>
     <div id="root">
-        <div id="radviz-container"></div>
-        <div id="pie-container"></div>
-        <div id="parallel-container"></div>
+        <div id="radviz-container"></div> <!-- Top-left: RadViz -->
+        <div id="pie-container"></div>    <!-- Top-right: Pie Chart -->
+        <div id="parallel-container"></div> <!-- Bottom: Parallel Coordinates -->
     </div>
     <script>
         d3.csv('iris.csv').then(data => {

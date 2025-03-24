@@ -17,16 +17,12 @@ class Control {
         this.filteredData = data.slice(); // copy of data (no filtering initially)
         this.color = d3.scaleOrdinal()
             .domain(["Setosa", "Versicolor", "Virginica"])
-            .range(["#8BC34A", "#9575CD", "#FFB74D"]); // Updated colors to match the image
+            .range(["#8BC34A", "#9575CD", "#FFB74D"]);
 
         // Active filter (null when no filter is applied)
         this.activeFilter = null;
 
-        // Instantiate the three visualizations with the current filtered data.
-        // Note: The visualizations call back into control via:
-        //   - onRadvizHover(d) from radviz.js,
-        //   - onParaHover(d)   from parallelcoordinate.js, and
-        //   - Select(variety)   from the pie chart (pie.js)
+        // Instantiate the visualizations with filteredData and shared color scale.
         this.radviz = new RadViz(this.filteredData, this);
         this.parallel = new Para(this.filteredData, this);
         this.pie = new Pie(this.filteredData, width, height, this);
@@ -34,44 +30,38 @@ class Control {
         console.log("Control initialized.");
     }
 
-    // Hover highlighting: highlighting in all views based on hovered datapoint
-    onHover(dataPoint) {
-        this.radviz.highlight(dataPoint);
-        this.parallel.highlight(dataPoint);
-        this.pie.Highlight(dataPoint.variety);
+    // Highlight matching elements across all views without filtering.
+    highlightViews(species) {
+        this.radviz.highlightBySpecies(species);
+        this.parallel.highlightBySpecies(species);
+        this.pie.highlightBySpecies(species);
     }
 
-    // Called when the mouse leaves a data point or line.
-    onHoverExit() {
-        this.radviz.clearHighlight();
-        this.parallel.clearHighlight();
-        this.pie.Unhighlight();
-    }
-
-    // Filtering via Pie Chart:
-    // If clicking on the same variety again, resets the filter.
-    Select(variety) {
-        if (this.activeFilter === variety) {
-            // Reset filter if the same variety is clicked again.
-            this.filteredData = this.data.slice();
-            this.activeFilter = null;
-        } else {
-            // Filter data by the selected variety.
-            this.filteredData = this.data.filter(d => d.variety === variety);
-            this.activeFilter = variety;
-        }
-        // Update each visualization with the new data.
+    // When an element is clicked or a brush event occurs, update all views by filtering the dataset.
+    updateViews(filterFunc) {
+        this.filteredData = this.data.filter(filterFunc);
         this.radviz.update(this.filteredData);
         this.parallel.update(this.filteredData);
-        this.pie.update(this.filteredData, this.activeFilter);
+        this.pie.update(this.filteredData, null);
     }
 
-    // These two methods provide a uniform entry point for the visualizations on hover.
-    onRadvizHover(dataPoint) {
-        this.onHover(dataPoint);
+    // Reset—that is, remove any filtering.
+    resetViews() {
+        this.filteredData = this.data.slice();
+        this.radviz.update(this.filteredData);
+        this.parallel.update(this.filteredData);
+        this.pie.update(this.filteredData, null);
     }
 
-    onParaHover(dataPoint) {
-        this.onHover(dataPoint);
+    // Called when hovering over an element in parallel coordinates (or elsewhere).
+    onParaHover(d) {
+        this.highlightViews(d.variety);
+    }
+
+    // Called when the mouse exits an element to clear highlights.
+    onHoverExit() {
+        this.radviz.unhighlight();
+        this.parallel.clearHighlight();
+        this.pie.Unhighlight();
     }
 }
