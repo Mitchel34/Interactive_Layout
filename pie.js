@@ -33,7 +33,8 @@ class Pie {
         this.pie.append("path")
             .attr("d", arc)
             .attr("fill", d => con.color(d.data))
-            .attr("stroke", "black");
+            .attr("stroke", "black")
+            .attr("fill-opacity", 0.8); // Set opacity to 0.8
 
         this.pie.append("text")
             .attr("transform", d => `translate(${arc.centroid(d)})`)
@@ -44,13 +45,13 @@ class Pie {
     // Highlight the slice for the specified variety.
     Highlight(variety) {
         this.pie.selectAll('path')
-            .attr('fill-opacity', d => d.data === variety ? 1 : 0.2);
+            .attr('fill-opacity', d => d.data === variety ? 1 : 0.2); // Highlight selected slice
     }
 
     // Reset the highlighting.
     Unhighlight() {
         this.pie.selectAll('path')
-            .attr('fill-opacity', 1);
+            .attr('fill-opacity', 0.8); // Reset to default opacity
     }
 
     // Update the pie chart when data changes or filtering is applied.

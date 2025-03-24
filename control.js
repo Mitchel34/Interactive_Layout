@@ -17,7 +17,7 @@ class Control {
         this.filteredData = data.slice(); // copy of data (no filtering initially)
         this.color = d3.scaleOrdinal()
             .domain(["Setosa", "Versicolor", "Virginica"])
-            .range(["#E32636", "#5072A7", "#4CBB17"]);
+            .range(["#8BC34A", "#9575CD", "#FFB74D"]); // Updated colors to match the image
 
         // Active filter (null when no filter is applied)
         this.activeFilter = null;

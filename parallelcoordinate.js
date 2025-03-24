@@ -79,10 +79,8 @@ class Para {
                 .call(yAxis);
         });
 
-        // Create a color scale based on variety
-        this.colorScale = d3.scaleOrdinal()
-            .domain(["Setosa", "Versicolor", "Virginica"])
-            .range(["#E32636", "#5072A7", "#4CBB17"]);
+        // Use the control's color scale instead of creating a new one
+        this.colorScale = this.control.color;
 
         // Render all parallel coordinate lines
         this.drawLines(this.data);
@@ -97,8 +95,9 @@ class Para {
             .append("path")
             .attr("class", "parallel-line")
             .attr("fill", "none")
-            .attr("stroke", d => this.colorScale(d.variety))
+            .attr("stroke", d => this.colorScale(d.variety)) // Use the shared color scale
             .attr("stroke-width", 1.75)
+            .attr("stroke-opacity", 0.8) // Set opacity to 0.8
             .attr("d", d => lineGenerator(
                 this.dimensions.map(dim => [this.xScale(dim), this.yScales[dim](+d[dim])])
             ))
@@ -115,7 +114,7 @@ class Para {
                 this.moveTooltip(event, d);
             })
             .on("mouseout", (event, d) => {
-                d3.select(event.currentTarget).attr("stroke-width", 1);
+                d3.select(event.currentTarget).attr("stroke-width", 1.75);
                 this.hideTooltip();
             });
     }
@@ -154,13 +153,15 @@ class Para {
     highlight(dataPoint) {
         this.mainGroup.selectAll('.parallel-line')
             .attr('stroke', d => d === dataPoint ? 'black' : this.colorScale(d.variety))
-            .attr('stroke-width', d => d === dataPoint ? 3 : 1.75);
+            .attr('stroke-width', d => d === dataPoint ? 3 : 1.75)
+            .attr('stroke-opacity', d => d === dataPoint ? 1 : 0.8); // Highlight selected line
     }
 
     clearHighlight() {
         this.mainGroup.selectAll('.parallel-line')
             .attr('stroke', d => this.colorScale(d.variety))
-            .attr('stroke-width', 1.75);
+            .attr('stroke-width', 1.75)
+            .attr('stroke-opacity', 0.8); // Reset to default opacity
     }
 
     update(filteredData) {

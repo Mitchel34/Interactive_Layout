@@ -71,7 +71,7 @@ class RadViz {
             .attr("class", "data-point")
             .attr("r", 5)
             .attr("fill", d => this.color(d.variety))
-            .attr("fill-opacity", 0.7)
+            .attr("fill-opacity", 0.8) // Set opacity to 0.8
             .attr("cx", d => {
                 const normValues = arrDimension.map(dim => +d[dim]);
                 const sum = d3.sum(normValues);
