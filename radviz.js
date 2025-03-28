@@ -98,10 +98,8 @@ class RadViz {
             .on("mouseover", (event, d) => {
                 this.showTooltip(event, d);
                 this.control.highlightViews(d.variety);
-                // Set hovered circle opacity to 0.9 and others to 0.1
                 this.svg.selectAll(".data-point")
                     .attr("fill-opacity", point => point === d ? 0.9 : 0.1);
-                // Draw connecting polyline across anchors
                 this.removeHighlightLine();
                 let points = this.arrDimension.map(dim => {
                     let norm = this.objDimScale[dim](+d[dim]);
@@ -113,8 +111,8 @@ class RadViz {
                     .attr("stroke", this.color(d.variety))
                     .attr("stroke-width", 2)
                     .attr("fill", this.color(d.variety))
-                    .attr("fill-opacity", 0.2);
-                // Add text labels at the corners of the polygon
+                    .attr("fill-opacity", 0.2)
+                    .style("pointer-events", "none"); // Prevent polygon from capturing mouse events
                 this.svg.selectAll(".polygon-label")
                     .data(points)
                     .enter()
@@ -122,14 +120,13 @@ class RadViz {
                     .attr("class", "polygon-label")
                     .attr("x", (p, i) => p[0])
                     .attr("y", (p, i) => p[1])
-                    .attr("dy", "-0.5em") // Offset text slightly above the point
+                    .attr("dy", "-0.5em")
                     .attr("text-anchor", "middle")
                     .attr("font-size", "10px")
                     .attr("fill", "black")
+                    .style("pointer-events", "none") // Disable pointer events on labels too
                     .text((p, i) => `${d[this.arrDimension[i]]}`);
-                // Highlight only the corresponding parallel coordinate line
                 this.control.parallel.highlightSingle(d);
-                // Add values to the tooltip
                 const values = this.arrDimension.map(dim => `${dim}: ${d[dim]}`).join("<br>");
                 this.tooltip.html(`<strong>${d.variety}</strong><br>${values}`)
                     .style("opacity", 1);
